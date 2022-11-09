@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.44949722, g: 0.4964931, b: 0.55914503, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -172,8 +172,9 @@ MonoBehaviour:
   ladder_wall: {fileID: 919132149155446097, guid: 35ed2ad39a058214ca2e315f2a2591e5, type: 3}
   end_left: {fileID: 919132149155446097, guid: 3cdc7a2259d02af46b0dfddadc3efb27, type: 3}
   end_right: {fileID: 3581520514000778468, guid: 45e194d73a507eb40b8653659febdbd9, type: 3}
-  columns: 10
+  columns: 14
   rows: 10
+  ladder_difference: 3
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -250,6 +251,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!4 &705507995

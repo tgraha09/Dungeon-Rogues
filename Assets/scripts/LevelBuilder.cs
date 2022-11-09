@@ -1,14 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 using v3 = UnityEngine.Vector3;
 using uRandom = UnityEngine.Random;
-
 using System;
 struct Space
 {
     public int row;
     public int column;
+    public GameObject prefab;
     public GameObject obj;
     public string tagName;
     public void print(string _note)
@@ -18,6 +19,7 @@ struct Space
 }
 public class LevelBuilder : MonoBehaviour
 {
+    
     // Start is called before the first frame update
     [SerializeField]
     private GameObject normal;
@@ -35,7 +37,10 @@ public class LevelBuilder : MonoBehaviour
     int columns;
     [SerializeField]
     int rows;
+    [SerializeField]
+    int ladder_difference;
     private Space[,] spaces;
+    private List<GameObject> all_spaces;
     private List<Space> ladders_closed;
     private List<Space> ladders_open;
     void Start()
@@ -56,7 +61,24 @@ public class LevelBuilder : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            DeleteBoard();
+            GenerateBasic();
+            BuildLadders();
+            //BuildLadderWalls();
+            BuildBoard();
+        }
+    }
+
+    private void DeleteBoard()
+    {
+        foreach (var space in all_spaces)
+        {
+            Destroy(space);
+        }
         
+
     }
 
     private void BuildLadderWalls()
@@ -66,141 +88,125 @@ public class LevelBuilder : MonoBehaviour
             int row_diff = 1;
             Space ladder = ladders_closed[i];
 
-            if (Mathf.Abs(ladder.row - row_diff) > 0 && ladder.column + 1 < columns)
+            /*if (Mathf.Abs(ladder.row - row_diff) > 0 && ladder.column + 1 < columns)
             {
 
                 Space open_left = spaces[Mathf.Abs(ladder.row - row_diff), ladder.column + 1];
                 if (open_left.tagName == "ladder_open")
                 {
                     open_left.print("Left ");
-                    open_left.obj = ladder_wall;
+                    open_left.prefab = ladder_wall;
                     open_left.tagName = "ladder_wall";
                     spaces[ladder.row, ladder.column + 1].tagName = "ladder_closed";
-                    spaces[ladder.row, ladder.column + 1].obj = ladder_closed;
+                    spaces[ladder.row, ladder.column + 1].prefab = ladder_closed;
                     spaces[ladder.row, ladder.column].tagName = "ladder_wall";
-                    spaces[ladder.row, ladder.column].obj = ladder_wall;
+                    spaces[ladder.row, ladder.column].prefab = ladder_wall;
                 }
 
-            }
-            if (ladder.row + row_diff < rows && ladder.column + 1 < columns)
+            }*/
+            /*if (ladder.row + row_diff < rows && ladder.column + 1 < columns)
             {
                 Space open_right = spaces[ladder.row + row_diff, ladder.column + 1];
                
                 if (open_right.tagName == "ladder_open")
                 {
                     open_right.print("Right ");
-                    open_right.obj = ladder_wall;
+                    open_right.prefab = ladder_wall;
                     open_right.tagName = "ladder_wall";
                     spaces[ladder.row, ladder.column + 1].tagName = "ladder_closed";
-                    spaces[ladder.row, ladder.column + 1].obj = ladder_closed;
+                    spaces[ladder.row, ladder.column + 1].prefab = ladder_closed;
 
                     spaces[ladder.row, ladder.column].tagName = "ladder_wall";
-                    spaces[ladder.row, ladder.column].obj = ladder_wall;
+                    spaces[ladder.row, ladder.column].prefab = ladder_wall;
                 }
-            }
+            }*/
         }
     }
 
     private void BuildLadders()
     {
-        Space previous = spaces[0, 0];
-        Space previous_second = spaces[0, 0];
-        ladders_closed = new List<Space>();
+        Space previous_ladder = spaces[0, 0];
         ladders_open = new List<Space>();
-        for (int c = 0; c < columns-1; c++)
+        ladders_closed = new List<Space>();
+        var level1 = 1;
+        var level2 = 0;
+        var diff = ladder_difference;
+        for (int r = 0; r < rows-1; r++)
         {
-            int new_row = 0;
-            var diff = 0;
-            var diff_second = 0;
+            int new_column = 0;
+            var diff_lvl1 = 0;
+            var diff_lvl2 = 0;
+            
             try
             {
-                
-                if(c < 2)
+                //previous.print("");
+                if (r < 2)
                 {
                     do
                     {
-                        new_row = uRandom.Range(1, rows - 1);
-                        diff = Mathf.Abs(previous.row - new_row);
+                        new_column = uRandom.Range(1, columns - 1);
+                        diff_lvl1 = Mathf.Abs(previous_ladder.column - new_column);
 
-                    } while (previous.row == new_row || diff < 4);
-                    
+                    } while (previous_ladder.column == new_column || diff_lvl1 < diff);
+
                 }
                 else
                 {
-
-                    
-                    /*
-
-                    //bool check = c > 2 && previous_second.tagName == "ladder_open";
-                    previous_second = spaces[previous.row, previous.column-1];
-                    diff_second = Mathf.Abs(previous_second.row - new_row);
-                    previous.print("1st");
-                    previous_second.print("2nd");
-                    if (diff_second < 2)
+                    do
                     {
-                        //previous.print("1st");
-                        //previous_second.print("2nd");
-                    }*/
-                    //Space left
-                    /*do
-                    {
-                        new_row = uRandom.Range(1, rows - 1);
-                        diff = Mathf.Abs(previous.row - new_row);
-                        diff_second = Mathf.Abs(previous_second.row - new_row);
+                        new_column = uRandom.Range(1, columns - 1);
+                        diff_lvl1 = Mathf.Abs(ladders_open[level1].column - new_column);
+                        diff_lvl2 = Mathf.Abs(ladders_open[level2].column - new_column);
 
-                    } while ((previous.row == new_row || diff < 4) 
-                    && (previous_second.row == new_row || diff_second < 4)); //&& check
-                    previous_second.print("");*/
-
+                    } while ((ladders_open[level1].column == new_column || diff_lvl1 < diff) || (ladders_open[level2].column == new_column || diff_lvl2 < diff)); //
+                    level1++;
+                    level2++;
                 }
 
-                Space s = spaces[new_row, c];
-                s.obj = ladder_open;
-                s.row = new_row;
-                s.column = c;
+                Space s = spaces[new_column, r];
+                s.prefab = ladder_open;
+                s.column = new_column;
+                s.row = r;
                 s.tagName = "ladder_open";
-                s.obj.transform.position = new v3(s.row, s.column, 0);
-                spaces[new_row, c] = s;
+                s.prefab.transform.position = new v3(s.column, s.row, 0);
+                spaces[new_column, r] = s;
                 ladders_open.Add(s);
-                
-                previous_second = previous;
-                previous = s;
-                previous.print("1st");
-                previous_second.print("2nd");
 
+                Space closed = spaces[new_column, r+1];
+                closed.prefab = ladder_closed;
+                closed.column = new_column;
+                closed.row = r+1;
+                closed.tagName = "ladder_closed";
+                closed.prefab.transform.position = new v3(s.column, s.row+1, 0);
+                spaces[new_column, r+1] = closed;
+                ladders_closed.Add(closed);
+
+                previous_ladder = s;
+                
 
             }
             catch (Exception error)
             {
                 Debug.Log(error.Message);
             }
+            
         }
-
-
-        /*for (int i = 0; i < ladders_open.Count; i++)
-        {
-            Space ladder = ladders_open[i];
-            Space closed = spaces[ladder.row, ladder.column + 1];
-            closed.obj = ladder_closed;
-            closed.tagName = "ladder_closed";
-            spaces[closed.row, closed.column] = closed;
-            ladders_closed.Add(closed);
-        }*/
-
     }
 
-  
+    
+
 
     private void BuildBoard()
     {
-
-        for (int r = 0; r < spaces.GetLength(0); r++)
+        all_spaces = new List<GameObject>();
+        for (int c = 0; c < spaces.GetLength(0); c++) 
         {
-            for (int c = 0; c < spaces.GetLength(1); c++)
+            for (int r = 0; r < spaces.GetLength(1); r++)
             {
-               Space s = spaces[r,c];
-               s.obj.transform.position = new v3(s.row, s.column, 0);
-               Instantiate(s.obj, s.obj.transform.position, Quaternion.Euler(0f, 180f, 0f));
+               Space s = spaces[c, r];
+               s.prefab.transform.position = new v3(s.column, s.row, 0);
+               GameObject gobj = Instantiate(s.prefab, s.prefab.transform.position, Quaternion.Euler(0f, 180f, 0f));
+               all_spaces.Add(gobj);
             }
         }
         
@@ -208,31 +214,31 @@ public class LevelBuilder : MonoBehaviour
 
     private void GenerateBasic()
     {
-        spaces = new Space[rows, columns];
-        for (int r = 0; r < rows; r++)
+        spaces = new Space[columns, rows];
+        for (int c = 0; c < columns; c++) 
         {
-            for (int c = 0; c < columns; c++)
+            for (int r = 0; r < rows; r++)
             {
                 Space s = new Space();
                 s.row = r;
                 s.column = c;
-                if (r == 0)
+                if (c == 0)
                 {
-                    s.obj = end_left;
-                    spaces[r, c] = s;
-                    spaces[r, c].tagName = "end_left";
+                    s.prefab = end_left;
+                    spaces[c, r] = s;
+                    spaces[c, r].tagName = "end_left";
                 }
-                else if (r == rows - 1)
+                else if (c == columns - 1)
                 {
-                    s.obj = end_right;
-                    spaces[r, c] = s;
-                    spaces[r, c].tagName = "end_right";
+                    s.prefab = end_right;
+                    spaces[c, r] = s;
+                    spaces[c, r].tagName = "end_right";
                 }
                 else
                 {
-                    s.obj = normal;
-                    spaces[r, c] = s;
-                    spaces[r, c].tagName = "normal";
+                    s.prefab = normal;
+                    spaces[c, r] = s;
+                    spaces[c, r].tagName = "normal";
                 }
             }
         }
