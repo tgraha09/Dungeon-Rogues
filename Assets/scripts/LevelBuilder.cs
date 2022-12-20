@@ -24,6 +24,10 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField]
     private GameObject normal;
     [SerializeField]
+    private GameObject ladder_top;
+    [SerializeField]
+    private GameObject ladder_bottom;
+    [SerializeField]
     private GameObject ladder_open;
     [SerializeField]
     private GameObject ladder_closed;
@@ -40,22 +44,18 @@ public class LevelBuilder : MonoBehaviour
     [SerializeField]
     int ladder_difference;
     private Space[,] spaces;
-    private List<GameObject> all_spaces;
+    private List<GameObject> all_GOBJS;
     private List<Space> ladders_closed;
     private List<Space> ladders_open;
     void Start()
     {
-       
+        
         GenerateBasic();
         BuildLadders();
-        //BuildLadderWalls();
+        BuildLadderWalls();
         BuildBoard();
-        
 
     }
-
-    
-
 
 
     // Update is called once per frame
@@ -66,18 +66,18 @@ public class LevelBuilder : MonoBehaviour
             DeleteBoard();
             GenerateBasic();
             BuildLadders();
-            //BuildLadderWalls();
+            BuildLadderWalls();
             BuildBoard();
         }
     }
 
     private void DeleteBoard()
     {
-        foreach (var space in all_spaces)
+        foreach (var space in all_GOBJS)
         {
             Destroy(space);
         }
-        
+        all_GOBJS.Clear();
 
     }
 
@@ -85,41 +85,32 @@ public class LevelBuilder : MonoBehaviour
     {
         for (int i = 0; i < ladders_closed.Count; i++)
         {
-            int row_diff = 1;
+            int row_diff = 2;
             Space ladder = ladders_closed[i];
 
-            /*if (Mathf.Abs(ladder.row - row_diff) > 0 && ladder.column + 1 < columns)
+            if (ladder.row + 2 < rows)
             {
-
-                Space open_left = spaces[Mathf.Abs(ladder.row - row_diff), ladder.column + 1];
-                if (open_left.tagName == "ladder_open")
+                //Debug.Log("IN");
+                Space open = spaces[ladder.column,ladder.row+2];
+                
+                if (open.tagName == "ladder_open")
                 {
-                    open_left.print("Left ");
-                    open_left.prefab = ladder_wall;
-                    open_left.tagName = "ladder_wall";
-                    spaces[ladder.row, ladder.column + 1].tagName = "ladder_closed";
-                    spaces[ladder.row, ladder.column + 1].prefab = ladder_closed;
-                    spaces[ladder.row, ladder.column].tagName = "ladder_wall";
-                    spaces[ladder.row, ladder.column].prefab = ladder_wall;
+                    open.print("");
+
+                    open.print("closed");
+                    //spaces[open.column, open.row].prefab = ladder_wall;
+                    //spaces[open.column, open.row].tagName = "ladder_wall";
+                    
+                    spaces[ladder.column, ladder.row+1].tagName = "ladder_closed";
+                    spaces[ladder.column, ladder.row+1].prefab = ladder_closed;
+
+                    spaces[ladder.column, ladder.row].tagName = "ladder_wall";
+                    spaces[ladder.column, ladder.row].prefab = ladder_wall;
                 }
 
-            }*/
-            /*if (ladder.row + row_diff < rows && ladder.column + 1 < columns)
-            {
-                Space open_right = spaces[ladder.row + row_diff, ladder.column + 1];
-               
-                if (open_right.tagName == "ladder_open")
-                {
-                    open_right.print("Right ");
-                    open_right.prefab = ladder_wall;
-                    open_right.tagName = "ladder_wall";
-                    spaces[ladder.row, ladder.column + 1].tagName = "ladder_closed";
-                    spaces[ladder.row, ladder.column + 1].prefab = ladder_closed;
-
-                    spaces[ladder.row, ladder.column].tagName = "ladder_wall";
-                    spaces[ladder.row, ladder.column].prefab = ladder_wall;
-                }
-            }*/
+            }
+        
+            
         }
     }
 
@@ -193,20 +184,51 @@ public class LevelBuilder : MonoBehaviour
         }
     }
 
-    
-
+    private Space ChangeSpace(int c, int r, string tagName, GameObject ladder, v3 pos)
+    {
+        Space s = spaces[c, r];
+        s.prefab = ladder;
+        s.column = c;
+        s.row = r;
+        s.tagName = tagName;
+        s.prefab.transform.position = pos;
+        spaces[c, r] = s;
+        return s;
+    }
 
     private void BuildBoard()
     {
-        all_spaces = new List<GameObject>();
+        all_GOBJS = new List<GameObject>();
         for (int c = 0; c < spaces.GetLength(0); c++) 
         {
             for (int r = 0; r < spaces.GetLength(1); r++)
             {
-               Space s = spaces[c, r];
-               s.prefab.transform.position = new v3(s.column, s.row, 0);
-               GameObject gobj = Instantiate(s.prefab, s.prefab.transform.position, Quaternion.Euler(0f, 180f, 0f));
-               all_spaces.Add(gobj);
+                Space s = spaces[c, r];
+                s.prefab.transform.position = new v3(s.column, s.row, 0);
+                GameObject gobj = Instantiate(s.prefab, s.prefab.transform.position, Quaternion.Euler(0f, 180f, 0f));
+                all_GOBJS.Add(gobj);
+                
+                if (s.tagName== "ladder_open")//|| s.tagName == "ladder_closed"
+                {
+                    v3 pos = s.prefab.transform.position;
+                    pos.z = -0.1f;
+                    GameObject _ladder = Instantiate(ladder_bottom, pos, Quaternion.Euler(0f, 180f, 0f));
+                    all_GOBJS.Add(_ladder);
+                }
+                else if (s.tagName == "ladder_closed")
+                {
+                    v3 pos = s.prefab.transform.position;
+                    pos.z = -0.1f;
+                    GameObject _ladder = Instantiate(ladder_top, pos, Quaternion.Euler(0f, 180f, 0f));
+                    all_GOBJS.Add(_ladder);
+                }
+                else if(s.tagName == "ladder_wall")
+                {
+                    v3 pos = s.prefab.transform.position;
+                    pos.z = -0.1f;
+                    GameObject _ladder = Instantiate(ladder_bottom, pos, Quaternion.Euler(0f, 180f, 0f));
+                    all_GOBJS.Add(_ladder);
+                }
             }
         }
         
