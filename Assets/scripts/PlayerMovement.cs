@@ -9,7 +9,9 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private bool isRunning;
     private bool S, D = false;
-    private bool moving = false;
+    private bool moving_right = false;
+    private bool moving_left = false;
+    private bool turnBack = false;
     [SerializeField]
     GameObject Player;
     void Start()
@@ -21,24 +23,67 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.D))
+        bool isRunning = animator.GetBool("isRunning");
+        bool isTurning = animator.GetBool("Turning180");
+
+        if (Input.GetKey(KeyCode.D))
         {
-            moving = true;
+            
+            moving_right = true;
+            moving_left = !moving_right;
+
             //if(transform.rotation.y )
             //transform.Rotate(0, 90, 0);
+            //transform.rotation = Quaternion.Euler(0, 90, 0);
             transform.rotation = Quaternion.Euler(0, 90, 0);
         }
-       
-        if (Input.GetKeyDown(KeyCode.A))
+        else //if (!Input.GetKey(KeyCode.D))
         {
-            moving = true;
+            //moving_right = false;
+        }
+
+        if (Input.GetKey(KeyCode.A) && AnimationPlaying("isRunning"))
+        {
+            //moving_right = false;
+            animator.SetBool("Turning180", true);
+        }
+
+        if (Input.GetKey(KeyCode.A) && !AnimationPlaying("Turning180")) //&& moving_right
+        {
+            
+            moving_left = true;
+            moving_right = !moving_left;
+            //transform.rotation = Quaternion.Euler(0, 270, 0);
 
             transform.rotation = Quaternion.Euler(0, 270, 0);
             //transform.Rotate(0, 270, 0);
         }
-        
-        
-        animator.SetBool("isRunning", moving);
+        else
+        {
+            //moving_left = false;
+        }
 
+       // animator.SetBool("Turning180", turnBack);
+        if (moving_right) //moving_left || 
+        {
+           animator.SetBool("isRunning", true);
+        }
+        else
+        {
+            animator.SetBool("isRunning", false);
+
+        }
+        
+       
+
+    }
+
+    private bool AnimationPlaying(string name)
+    {
+        if (this.animator.GetCurrentAnimatorStateInfo(0).IsName(name))
+        {
+            return true;
+        }
+        return false;
     }
 }

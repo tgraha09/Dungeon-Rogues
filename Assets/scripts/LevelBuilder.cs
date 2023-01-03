@@ -19,8 +19,12 @@ struct Space
 }
 public class LevelBuilder : MonoBehaviour
 {
-    
+
     // Start is called before the first frame update
+    [SerializeField]
+    private Camera mainCam;
+    [SerializeField]
+    private Camera playerCam;
     [SerializeField]
     private GameObject normal;
     [SerializeField]
@@ -43,13 +47,15 @@ public class LevelBuilder : MonoBehaviour
     int rows;
     [SerializeField]
     int ladder_difference;
+ 
     private Space[,] spaces;
     private List<GameObject> all_GOBJS;
     private List<Space> ladders_closed;
     private List<Space> ladders_open;
     void Start()
     {
-        
+        playerCam.enabled = false;
+        mainCam.enabled = true;
         GenerateBasic();
         BuildLadders();
         BuildLadderWalls();
@@ -68,6 +74,17 @@ public class LevelBuilder : MonoBehaviour
             BuildLadders();
             BuildLadderWalls();
             BuildBoard();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            playerCam.enabled = true;
+            mainCam.enabled = false;
+
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            playerCam.enabled = false;
+            mainCam.enabled = true;
         }
     }
 
